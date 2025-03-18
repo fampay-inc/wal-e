@@ -124,7 +124,12 @@ func (wc *WALController) ProcessWalLog(req *Log) {
 	fmt.Printf("%+v\n", req.RawMsg)
 	switch msg := req.RawMsg.(type) {
 	case *pgproto3.CopyData:
-		req.Wal = wc.processCopyData(msg.Data)
+		walLog := wc.processCopyData(msg.Data)
+		if walLog != nil {
+			req.Wal = walLog
+		} else {
+			fmt.Println("< WAL is NIL >")
+		}
 		// if walLog != nil {
 		// 	err := wc.processWalLog(req.ctx, walLog)
 		// 	if err != nil {
