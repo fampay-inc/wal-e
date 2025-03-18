@@ -22,10 +22,12 @@ type WALController struct {
 	lastEmptyBatchPkmSentTime time.Time
 	handlers                  []Handler
 	ConsumerHealth            ConsumerHealth
+	relationCache             map[uint32]RelationData
 
 	// metrics function
 	WalStandyStatusUpdateCounter func(context.Context, string, string)
 	ReplicaLagMetricFunc         func(context.Context, int64)
+	RecoverFromPanic             func()
 }
 
 type Config struct {
@@ -39,6 +41,28 @@ type Log struct {
 	handlerIndex  int
 	walController *WALController
 	RawMsg        pgproto3.BackendMessage
+}
+
+type Column string
+type Operation string
+type Table string
+
+const (
+	Insert Operation = "INSERT"
+	Update Operation = "UPDATE"
+	Delete Operation = "DELETE"
+)
+
+type RelationData struct {
+	Relation string
+	Columns  []Column
+}
+
+type Wal struct {
+	Operation    Operation
+	TableName    Table
+	Values       map[Column][]byte
+	DateModified time.Time
 }
 
 func (r *Log) Next() {
