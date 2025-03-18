@@ -53,11 +53,11 @@ func (wc *WALController) SendStandbyStatusUpdate() error {
 		WALApplyPosition: wc.lastLSN,
 	})
 	if err != nil {
-		wc.consumerHealth.SetHealth(false)
+		wc.ConsumerHealth.SetHealth(false)
 		wc.WalStandyStatusUpdateCounter(wc.ctx, "error", err.Error())
 		return err
 	}
-	wc.consumerHealth.SetHealth(true)
+	wc.ConsumerHealth.SetHealth(true)
 	return nil
 }
 
@@ -86,7 +86,7 @@ func (wc *WALController) Consume(wg *sync.WaitGroup) error {
 	for {
 		select {
 		case <-wc.ctx.Done():
-			wc.consumerHealth.Shutdown()
+			wc.ConsumerHealth.Shutdown()
 			wc.replicationConn.Close(wc.ctx)
 			wc.masterDbConn.Close(wc.ctx)
 			return nil
@@ -94,7 +94,7 @@ func (wc *WALController) Consume(wg *sync.WaitGroup) error {
 			newCtx := wc.ctx
 			rawMsg, err := wc.replicationConn.ReceiveMessage(newCtx)
 			if err != nil {
-				wc.consumerHealth.SetHealth(false)
+				wc.ConsumerHealth.SetHealth(false)
 				return err
 			}
 			req := wc.NewLog(newCtx, rawMsg)
