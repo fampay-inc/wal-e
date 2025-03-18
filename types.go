@@ -41,6 +41,7 @@ type Log struct {
 	handlerIndex  int
 	walController *WALController
 	RawMsg        pgproto3.BackendMessage
+	Wal           *Wal
 }
 
 type Column string

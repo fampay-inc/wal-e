@@ -6,7 +6,7 @@ import (
 	"github.com/jackc/pglogrepl"
 )
 
-func ProcessCopyData(wc *WALController, msgData []byte) *Wal {
+func (wc *WALController) processCopyData(msgData []byte) *Wal {
 	defer wc.RecoverFromPanic()
 	// Parse the message
 	switch msgData[0] {
@@ -99,3 +99,13 @@ func (wc *WALController) processDeleteMessage(msg *pglogrepl.DeleteMessage) *Wal
 	walLog.TableName = Table(wc.relationCache[msg.RelationID].Relation)
 	return &walLog
 }
+
+// func (wc *WALController) processWalLog(ctx context.Context, walLog *waldom.WALLog) error {
+// err := wc.ivUc.ProcessWalLog(ctx, walLog)
+// if err != nil {
+// 	wc.logger.Errorf("Error processing WAL log: %v", err)
+// 	return err
+// }
+// wc.logger.Debugf("Processed WAL log, operation=%s, table=%s", walLog.Operation, walLog.TableName)
+// return nil
+// }

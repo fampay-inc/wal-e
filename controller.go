@@ -118,3 +118,31 @@ func (wc *WALController) SendPeriodicStandbyStatusUpdate() {
 		}
 	}
 }
+
+func (wc *WALController) ProcessWalLog(req *Log) {
+	switch msg := req.RawMsg.(type) {
+	case *pgproto3.CopyData:
+		req.Wal = wc.processCopyData(msg.Data)
+		// if walLog != nil {
+		// 	err := wc.processWalLog(req.ctx, walLog)
+		// 	if err != nil {
+		// 		errdom.RaiseToSentry(req.ctx, err)
+		// 	}
+		// 	updatedAtOfWal, err := wc.ivUc.GetUpdatedAtOfWal(req.ctx, walLog)
+		// 	if err != nil {
+		// 		errdom.RaiseToSentry(req.ctx, err)
+		// 	}
+		// 	emitMetrics(currentTime, updatedAtOfWal, err)
+		// 	metrics.WalTableLogCounter.WithLabelValues(string(walLog.TableName), string(walLog.Operation)).Inc()
+		// } else {
+		// 	metrics.WalProcessedCounter.WithLabelValues("non_data", "success", "").Inc()
+		// 	metrics.WalProcessingLatency.WithLabelValues("non_data").Observe(time.Since(currentTime).Seconds())
+		// }
+		wc.ConsumerHealth.SetHealth(true)
+	case *pgproto3.ErrorResponse:
+		// wc.logger.Errorf("Error response from server: %v", msg)
+
+	default:
+		// wc.logger.Errorf("Unknown message type: %v", msg)
+	}
+}
