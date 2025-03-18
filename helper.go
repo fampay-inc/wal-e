@@ -10,6 +10,7 @@ import (
 func (wc *WALController) processCopyData(msgData []byte) *Wal {
 	defer wc.RecoverFromPanic()
 	// Parse the message
+	fmt.Printf(">> msgData %v\n", msgData[0])
 	switch msgData[0] {
 	case pglogrepl.XLogDataByteID:
 		xld, err := pglogrepl.ParseXLogData(msgData[1:])
