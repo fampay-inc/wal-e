@@ -1,4 +1,4 @@
-package wale
+package wal_e
 
 import (
 	"context"

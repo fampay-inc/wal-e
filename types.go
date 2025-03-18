@@ -1,4 +1,4 @@
-package wale
+package wal_e
 
 import (
 	"context"
@@ -35,10 +35,10 @@ type Config struct {
 }
 
 type Log struct {
-	ctx           context.Context
+	Ctx           context.Context
 	handlerIndex  int
 	walController *WALController
-	rawMsg        pgproto3.BackendMessage
+	RawMsg        pgproto3.BackendMessage
 }
 
 func (r *Log) Next() {

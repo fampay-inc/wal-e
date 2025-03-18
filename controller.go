@@ -1,4 +1,4 @@
-package wale
+package wal_e
 
 import (
 	"context"
@@ -15,10 +15,10 @@ func (wc *WALController) AddHandler(handler Handler) {
 
 func (wc *WALController) NewLog(ctx context.Context, rawMsg pgproto3.BackendMessage) *Log {
 	return &Log{
-		ctx:           ctx,
+		Ctx:           ctx,
 		handlerIndex:  0,
 		walController: wc,
-		rawMsg:        rawMsg,
+		RawMsg:        rawMsg,
 	}
 }
 
