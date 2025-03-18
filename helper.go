@@ -47,8 +47,7 @@ func (wc *WALController) processCopyData(msgData []byte) *Wal {
 		wc.lastLSN = pkm.ServerWALEnd
 	default:
 		// wc.logger.Fatalf("Unknown message type: %v", msgData[0])
-		fmt.Println("Unknown message type: %v", msgData[0])
-		// panic(err)
+		panic(fmt.Errorf("Unknown message type: %v", msgData[0]))
 	}
 	return nil
 }
