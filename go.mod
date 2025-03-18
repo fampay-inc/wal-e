@@ -1,4 +1,4 @@
-module wal-e
+module git.famapp.in/fampay-inc/wal-e
 
 go 1.24.1
 
