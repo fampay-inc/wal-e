@@ -121,6 +121,7 @@ func (wc *WALController) SendPeriodicStandbyStatusUpdate() {
 }
 
 func (wc *WALController) ProcessWalLog(req *Log) {
+	fmt.Printf("%+v\n", req.RawMsg)
 	switch msg := req.RawMsg.(type) {
 	case *pgproto3.CopyData:
 		req.Wal = wc.processCopyData(msg.Data)
@@ -144,9 +145,11 @@ func (wc *WALController) ProcessWalLog(req *Log) {
 		wc.ConsumerHealth.SetHealth(true)
 		req.Next()
 	case *pgproto3.ErrorResponse:
+		fmt.Printf("This is error, %+v\n", msg)
 		// wc.logger.Errorf("Error response from server: %v", msg)
 
 	default:
+		fmt.Printf("Unknown message type, %+v\n", msg)
 		// wc.logger.Errorf("Unknown message type: %v", msg)
 	}
 }
