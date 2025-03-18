@@ -9,8 +9,8 @@ import (
 	"github.com/jackc/pgproto3/v2"
 )
 
-func (wc *WALController) AddHandler(handler Handler) {
-	wc.handlers = append(wc.handlers, handler)
+func (wc *WALController) AddHandlers(handlers ...Handler) {
+	wc.handlers = append(wc.handlers, handlers...)
 }
 
 func (wc *WALController) NewLog(ctx context.Context, rawMsg pgproto3.BackendMessage) *Log {
