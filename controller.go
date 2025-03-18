@@ -2,6 +2,7 @@ package wal_e
 
 import (
 	"context"
+	"fmt"
 	"sync"
 	"time"
 
@@ -92,7 +93,9 @@ func (wc *WALController) Consume(wg *sync.WaitGroup) error {
 			return nil
 		default:
 			newCtx := wc.ctx
+			fmt.Println("Here?????")
 			rawMsg, err := wc.replicationConn.ReceiveMessage(newCtx)
+			fmt.Printf("%+v\n", rawMsg)
 			if err != nil {
 				wc.ConsumerHealth.SetHealth(false)
 				return err
