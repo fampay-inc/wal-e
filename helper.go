@@ -6,7 +6,7 @@ import (
 	"github.com/jackc/pglogrepl"
 )
 
-func (wc *WALController) ProcessCopyData(msgData []byte) *Wal {
+func ProcessCopyData(wc *WALController, msgData []byte) *Wal {
 	defer wc.RecoverFromPanic()
 	// Parse the message
 	switch msgData[0] {
