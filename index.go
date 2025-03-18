@@ -26,6 +26,7 @@ func NewWalConsumer(ctx context.Context, masterDBUri string, config *Config) (*W
 		config:          config,
 		masterDbConn:    masterDBConn,
 		replicationConn: replicationConn,
+		relationCache:   make(map[uint32]RelationData),
 	}
 	return walController, nil
 }
