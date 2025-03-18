@@ -93,9 +93,7 @@ func (wc *WALController) Consume(wg *sync.WaitGroup) error {
 			return nil
 		default:
 			newCtx := wc.ctx
-			fmt.Println("Here?????")
 			rawMsg, err := wc.replicationConn.ReceiveMessage(newCtx)
-			fmt.Printf("%+v\n", rawMsg)
 			if err != nil {
 				wc.ConsumerHealth.SetHealth(false)
 				return err
@@ -141,6 +139,8 @@ func (wc *WALController) ProcessWalLog(req *Log) {
 		// 	metrics.WalProcessedCounter.WithLabelValues("non_data", "success", "").Inc()
 		// 	metrics.WalProcessingLatency.WithLabelValues("non_data").Observe(time.Since(currentTime).Seconds())
 		// }
+		fmt.Println("> Processed CopyData")
+		fmt.Printf("%+v\n", req.Wal)
 		wc.ConsumerHealth.SetHealth(true)
 		req.Next()
 	case *pgproto3.ErrorResponse:
