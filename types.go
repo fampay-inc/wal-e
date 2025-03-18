@@ -5,9 +5,9 @@ import (
 	"time"
 
 	"github.com/jackc/pglogrepl"
-	"github.com/jackc/pgproto3/v2"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
+	"github.com/jackc/pgx/v5/pgproto3"
 )
 
 type Handler func(*Log)
