@@ -139,6 +139,7 @@ func (wc *WALController) ProcessWalLog(req *Log) {
 		// 	metrics.WalProcessingLatency.WithLabelValues("non_data").Observe(time.Since(currentTime).Seconds())
 		// }
 		wc.ConsumerHealth.SetHealth(true)
+		req.Next()
 	case *pgproto3.ErrorResponse:
 		// wc.logger.Errorf("Error response from server: %v", msg)
 
