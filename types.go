@@ -21,7 +21,7 @@ type WALController struct {
 	lastLSN                   pglogrepl.LSN
 	lastEmptyBatchPkmSentTime time.Time
 	handlers                  []Handler
-	consumerHealth            ConsumerHealth
+	ConsumerHealth            ConsumerHealth
 
 	// metrics function
 	WalStandyStatusUpdateCounter func(context.Context, string, string)
