@@ -61,7 +61,7 @@ func (wc *WALController) SendStandbyStatusUpdate() error {
 	return nil
 }
 
-func (wc *WALController) GetReplicationLag(metricFunc func(int64)) {
+func (wc *WALController) GetReplicationLag() {
 	ticker := time.NewTicker(5 * time.Second)
 	for {
 		select {
@@ -76,7 +76,7 @@ func (wc *WALController) GetReplicationLag(metricFunc func(int64)) {
 				continue
 			}
 			var replicationLag = walWriteLSN - wc.lastLSN
-			metricFunc(int64(replicationLag))
+			wc.ReplicaLagMetricFunc(wc.ctx, int64(replicationLag))
 		}
 	}
 }

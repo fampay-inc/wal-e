@@ -25,6 +25,7 @@ type WALController struct {
 
 	// metrics function
 	WalStandyStatusUpdateCounter func(context.Context, string, string)
+	ReplicaLagMetricFunc         func(context.Context, int64)
 }
 
 type Config struct {
