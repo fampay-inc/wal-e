@@ -121,7 +121,6 @@ func (wc *WALController) SendPeriodicStandbyStatusUpdate() {
 }
 
 func (wc *WALController) ProcessWalLog(req *Log) {
-	fmt.Printf("%+v\n", req.RawMsg)
 	switch msg := req.RawMsg.(type) {
 	case *pgproto3.CopyData:
 		walLog := wc.processCopyData(msg.Data)
@@ -145,8 +144,6 @@ func (wc *WALController) ProcessWalLog(req *Log) {
 		// 	metrics.WalProcessedCounter.WithLabelValues("non_data", "success", "").Inc()
 		// 	metrics.WalProcessingLatency.WithLabelValues("non_data").Observe(time.Since(currentTime).Seconds())
 		// }
-		fmt.Println("> Processed CopyData")
-		fmt.Printf("%+v\n", req.Wal)
 		wc.ConsumerHealth.SetHealth(true)
 		req.Next()
 	case *pgproto3.ErrorResponse:
