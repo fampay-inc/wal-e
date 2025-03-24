@@ -56,15 +56,15 @@ const (
 
 type RelationData struct {
 	Relation    string
-	Columns     []Column
-	ColumnTypes map[Column]uint32
+	Columns     []string
+	ColumnTypes map[string]uint32
 }
 
 type Wal struct {
 	Operation    Operation
 	TableName    Table
-	Values       map[Column]any
-	ValuesNew    map[Column]any
+	Values       map[string]any
+	ValuesNew    map[string]any
 	DateModified time.Time
 }
 

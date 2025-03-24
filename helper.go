@@ -103,11 +103,11 @@ func processOID(oid uint32, data []byte) (any, error) {
 }
 
 func (wc *WALController) processRelationMessage(msg *pglogrepl.RelationMessage) {
-	columns := make([]Column, len(msg.Columns))
-	columnType := make(map[Column]uint32)
+	columns := make([]string, len(msg.Columns))
+	columnType := make(map[string]uint32)
 	for i, col := range msg.Columns {
-		columns[i] = Column(col.Name)
-		columnType[Column(col.Name)] = col.DataType
+		columns[i] = col.Name
+		columnType[col.Name] = col.DataType
 	}
 	wc.relationCache[msg.RelationID] = RelationData{
 		Columns:     columns,
@@ -119,7 +119,7 @@ func (wc *WALController) processRelationMessage(msg *pglogrepl.RelationMessage) 
 func (wc *WALController) processInsertMessage(msg *pglogrepl.InsertMessage) *Wal {
 	relationColumns := wc.relationCache[msg.RelationID].Columns
 	var walLog = Wal{
-		Values: make(map[Column]any),
+		Values: make(map[string]any),
 	}
 	for i := range len(relationColumns) {
 		oid := wc.relationCache[msg.RelationID].ColumnTypes[relationColumns[i]]
@@ -137,7 +137,7 @@ func (wc *WALController) processInsertMessage(msg *pglogrepl.InsertMessage) *Wal
 func (wc *WALController) processUpdateMessage(msg *pglogrepl.UpdateMessage) *Wal {
 	relationColumns := wc.relationCache[msg.RelationID].Columns
 	var walLog = &Wal{
-		Values: make(map[Column]any),
+		Values: make(map[string]any),
 	}
 	for i := range len(relationColumns) {
 		oid := wc.relationCache[msg.RelationID].ColumnTypes[relationColumns[i]]
@@ -155,7 +155,7 @@ func (wc *WALController) processUpdateMessage(msg *pglogrepl.UpdateMessage) *Wal
 func (wc *WALController) processDeleteMessage(msg *pglogrepl.DeleteMessage) *Wal {
 	relationColumns := wc.relationCache[msg.RelationID].Columns
 	var walLog = Wal{
-		Values: make(map[Column]any),
+		Values: make(map[string]any),
 	}
 	for i := range len(relationColumns) {
 		oid := wc.relationCache[msg.RelationID].ColumnTypes[relationColumns[i]]
