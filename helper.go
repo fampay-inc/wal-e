@@ -136,7 +136,7 @@ func (wc *WALController) processInsertMessage(msg *pglogrepl.InsertMessage) *Wal
 
 func (wc *WALController) processUpdateMessage(msg *pglogrepl.UpdateMessage) *Wal {
 	relationColumns := wc.relationCache[msg.RelationID].Columns
-	var walLog = Wal{
+	var walLog = &Wal{
 		Values: make(map[Column]any),
 	}
 	for i := range len(relationColumns) {
@@ -149,7 +149,7 @@ func (wc *WALController) processUpdateMessage(msg *pglogrepl.UpdateMessage) *Wal
 	}
 	walLog.Operation = Update
 	walLog.TableName = Table(wc.relationCache[msg.RelationID].Relation)
-	return &walLog
+	return walLog
 }
 
 func (wc *WALController) processDeleteMessage(msg *pglogrepl.DeleteMessage) *Wal {
