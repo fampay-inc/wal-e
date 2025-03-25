@@ -63,12 +63,8 @@ func processOID(oid uint32, data []byte) (any, error) {
 		return strValue == "t" || strValue == "true" || strValue == "True", nil
 	case 17:
 		return data, nil
-	case 20: // BIGINT
+	case 20, 21, 23: // BIGINT, INT, SMALLINT
 		return strconv.ParseInt(strValue, 10, 64)
-
-	case 21, 23: // SMALLINT, INTEGER
-		return strconv.Atoi(strValue)
-
 	case 25, 1043: // TEXT, VARCHAR
 		return strValue, nil
 
