@@ -126,8 +126,6 @@ func (wc *WALController) ProcessWalLog(req *Log) {
 		walLog := wc.processCopyData(msg.Data)
 		if walLog != nil {
 			req.Wal = walLog
-		} else {
-			fmt.Println("< WAL is NIL >")
 		}
 		// if walLog != nil {
 		// 	err := wc.processWalLog(req.ctx, walLog)
