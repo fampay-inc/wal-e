@@ -34,7 +34,7 @@ type Config struct {
 	ReplicationSlot       string
 	Publications          string
 	WalConsumerHealthPort int
-	ExtraPluginArgs []string
+	ExtraPluginArgs       []string
 }
 
 type Log struct {
@@ -62,20 +62,21 @@ type RelationData struct {
 }
 
 type TableAction struct {
-	Operation Operation
-	TableName Table
-	Values   map[string]any
-	OldValues map[string]any
+	Operation    Operation
+	TableName    Table
+	Values       map[string]any
+	OldValues    map[string]any
 	DateModified time.Time
 }
 
 type LogicalMessage struct {
-	Prefix string
+	Prefix  string
 	Content []byte
 }
 type Wal struct {
-	TableAction *TableAction
+	TableAction    *TableAction
 	LogicalMessage *LogicalMessage
+	LSN            pglogrepl.LSN
 }
 
 func (r *Log) Next() {

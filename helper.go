@@ -28,13 +28,13 @@ func (wc *WALController) processCopyData(msgData []byte) *Wal {
 		case *pglogrepl.RelationMessage:
 			wc.processRelationMessage(msg)
 		case *pglogrepl.InsertMessage:
-			return wc.processInsertMessage(msg)
+			return wc.processInsertMessage(msg, xld)
 		case *pglogrepl.UpdateMessage:
-			return wc.processUpdateMessage(msg)
+			return wc.processUpdateMessage(msg, xld)
 		case *pglogrepl.DeleteMessage:
-			return wc.processDeleteMessage(msg)
+			return wc.processDeleteMessage(msg, xld)
 		case *pglogrepl.LogicalDecodingMessage:
-			return wc.processLogicalMessage(msg)
+			return wc.processLogicalMessage(msg, xld)
 		}
 		wc.lastLSN = xld.ServerWALEnd
 	case pglogrepl.PrimaryKeepaliveMessageByteID:
@@ -114,7 +114,7 @@ func (wc *WALController) processRelationMessage(msg *pglogrepl.RelationMessage) 
 	}
 }
 
-func (wc *WALController) processInsertMessage(msg *pglogrepl.InsertMessage) *Wal {
+func (wc *WALController) processInsertMessage(msg *pglogrepl.InsertMessage, walData pglogrepl.XLogData) *Wal {
 	relationColumns := wc.relationCache[msg.RelationID].Columns
 	var tableAction = TableAction{
 		Values: make(map[string]any),
@@ -131,13 +131,14 @@ func (wc *WALController) processInsertMessage(msg *pglogrepl.InsertMessage) *Wal
 	tableAction.TableName = Table(wc.relationCache[msg.RelationID].Relation)
 	return &Wal{
 		TableAction: &tableAction,
+		LSN:         walData.ServerWALEnd,
 	}
 }
 
-func (wc *WALController) processUpdateMessage(msg *pglogrepl.UpdateMessage) *Wal {
+func (wc *WALController) processUpdateMessage(msg *pglogrepl.UpdateMessage, walData pglogrepl.XLogData) *Wal {
 	relationColumns := wc.relationCache[msg.RelationID].Columns
 	var tableAction = &TableAction{
-		Values:  make(map[string]any),
+		Values:    make(map[string]any),
 		OldValues: make(map[string]any),
 	}
 	for i := range len(relationColumns) {
@@ -148,25 +149,28 @@ func (wc *WALController) processUpdateMessage(msg *pglogrepl.UpdateMessage) *Wal
 		}
 		tableAction.Values[relationColumns[i]] = processedValue
 	}
-	for i := range len(relationColumns) {
-		oid := wc.relationCache[msg.RelationID].ColumnTypes[relationColumns[i]]
-		processedValue, err := processOID(oid, msg.OldTuple.Columns[i].Data)
-		if err != nil {
-			fmt.Println(err)
+	if msg.OldTuple != nil {
+		for i := range len(relationColumns) {
+			oid := wc.relationCache[msg.RelationID].ColumnTypes[relationColumns[i]]
+			processedValue, err := processOID(oid, msg.OldTuple.Columns[i].Data)
+			if err != nil {
+				fmt.Println(err)
+			}
+			tableAction.OldValues[relationColumns[i]] = processedValue
 		}
-		tableAction.OldValues[relationColumns[i]] = processedValue
 	}
 	tableAction.Operation = Update
 	tableAction.TableName = Table(wc.relationCache[msg.RelationID].Relation)
 	return &Wal{
 		TableAction: tableAction,
+		LSN:         walData.ServerWALEnd,
 	}
 }
 
-func (wc *WALController) processDeleteMessage(msg *pglogrepl.DeleteMessage) *Wal {
+func (wc *WALController) processDeleteMessage(msg *pglogrepl.DeleteMessage, walData pglogrepl.XLogData) *Wal {
 	relationColumns := wc.relationCache[msg.RelationID].Columns
 	var tableAction = &TableAction{
-		Values:  make(map[string]any),
+		Values:    make(map[string]any),
 		OldValues: make(map[string]any),
 	}
 	for i := range len(relationColumns) {
@@ -189,15 +193,17 @@ func (wc *WALController) processDeleteMessage(msg *pglogrepl.DeleteMessage) *Wal
 	tableAction.TableName = Table(wc.relationCache[msg.RelationID].Relation)
 	return &Wal{
 		TableAction: tableAction,
+		LSN:         walData.ServerWALEnd,
 	}
 }
 
-func (wc *WALController) processLogicalMessage(msg *pglogrepl.LogicalDecodingMessage) *Wal{
+func (wc *WALController) processLogicalMessage(msg *pglogrepl.LogicalDecodingMessage, walData pglogrepl.XLogData) *Wal {
 	var logicalMessage = &LogicalMessage{
-		Prefix: msg.Prefix,
+		Prefix:  msg.Prefix,
 		Content: msg.Content,
 	}
 	return &Wal{
 		LogicalMessage: logicalMessage,
+		LSN:            walData.ServerWALEnd,
 	}
 }

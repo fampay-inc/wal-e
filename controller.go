@@ -66,6 +66,21 @@ func (wc *WALController) SendStandbyStatusUpdate() error {
 	return nil
 }
 
+func (wc *WALController) SendStatusUpdate(lsn pglogrepl.LSN) error {
+	err := pglogrepl.SendStandbyStatusUpdate(wc.ctx, wc.replicationConn, pglogrepl.StandbyStatusUpdate{
+		WALWritePosition: lsn,
+		WALFlushPosition: lsn,
+		WALApplyPosition: lsn,
+	})
+	if err != nil {
+		wc.ConsumerHealth.SetHealth(false)
+		wc.WalStandyStatusUpdateCounter(wc.ctx, "error", err.Error())
+		return err
+	}
+	wc.ConsumerHealth.SetHealth(true)
+	return nil
+}
+
 func (wc *WALController) GetReplicationLag() {
 	ticker := time.NewTicker(5 * time.Second)
 	for {
