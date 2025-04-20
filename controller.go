@@ -35,11 +35,15 @@ func (wc *WALController) InitConsumer() error {
 	}
 
 	// Start replication
+	plugins := []string{
+		"proto_version '1'",
+		"publication_names '" + wc.config.Publications + "'",
+	}
+	if len(wc.config.ExtraPluginArgs) > 0 {
+		plugins = append(plugins, wc.config.ExtraPluginArgs...)
+	}
 	err = pglogrepl.StartReplication(wc.ctx, wc.replicationConn, wc.config.ReplicationSlot, wc.lastLSN, pglogrepl.StartReplicationOptions{
-		PluginArgs: []string{
-			"proto_version '1'",
-			"publication_names '" + wc.config.Publications + "'",
-		},
+		PluginArgs: plugins,
 	})
 	if err != nil {
 		return err

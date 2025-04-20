@@ -34,6 +34,7 @@ type Config struct {
 	ReplicationSlot       string
 	Publications          string
 	WalConsumerHealthPort int
+	ExtraPluginArgs []string
 }
 
 type Log struct {
@@ -60,12 +61,21 @@ type RelationData struct {
 	ColumnTypes map[string]uint32
 }
 
-type Wal struct {
-	Operation    Operation
-	TableName    Table
-	Values       map[string]any
-	ValuesNew    map[string]any
+type TableAction struct {
+	Operation Operation
+	TableName Table
+	Values   map[string]any
+	OldValues map[string]any
 	DateModified time.Time
+}
+
+type LogicalMessage struct {
+	Prefix string
+	Content []byte
+}
+type Wal struct {
+	TableAction *TableAction
+	LogicalMessage *LogicalMessage
 }
 
 func (r *Log) Next() {
