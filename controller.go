@@ -73,7 +73,6 @@ func (wc *WALController) SendStatusUpdate(lsn pglogrepl.LSN) error {
 	})
 	if err != nil {
 		wc.ConsumerHealth.SetHealth(false)
-		wc.WalStandyStatusUpdateCounter(wc.ctx, "error", err.Error())
 		return err
 	}
 	wc.ConsumerHealth.SetHealth(true)
