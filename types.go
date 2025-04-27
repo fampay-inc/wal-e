@@ -24,10 +24,7 @@ type WALController struct {
 	ConsumerHealth            ConsumerHealth
 	relationCache             map[uint32]RelationData
 
-	// metrics function
-	WalStandyStatusUpdateCounter func(context.Context, string, string)
-	ReplicaLagMetricFunc         func(context.Context, int64)
-	RecoverFromPanic             func() func()
+	RecoverFromPanic func() func()
 }
 
 type Config struct {

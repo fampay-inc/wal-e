@@ -59,7 +59,6 @@ func (wc *WALController) SendStandbyStatusUpdate() error {
 	})
 	if err != nil {
 		wc.ConsumerHealth.SetHealth(false)
-		wc.WalStandyStatusUpdateCounter(wc.ctx, "error", err.Error())
 		return err
 	}
 	wc.ConsumerHealth.SetHealth(true)
@@ -81,7 +80,7 @@ func (wc *WALController) SendStatusUpdate(lsn pglogrepl.LSN) error {
 	return nil
 }
 
-func (wc *WALController) GetReplicationLag() {
+func (wc *WALController) GetReplicationLag(replicaLagMetricFunc func(context.Context, int64)) {
 	ticker := time.NewTicker(5 * time.Second)
 	for {
 		select {
@@ -96,7 +95,7 @@ func (wc *WALController) GetReplicationLag() {
 				continue
 			}
 			var replicationLag = walWriteLSN - wc.lastLSN
-			wc.ReplicaLagMetricFunc(wc.ctx, int64(replicationLag))
+			replicaLagMetricFunc(wc.ctx, int64(replicationLag))
 		}
 	}
 }
