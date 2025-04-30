@@ -109,7 +109,8 @@ func (wc *WALController) Consume(wg *sync.WaitGroup) error {
 			wc.masterDbConn.Close(wc.ctx)
 			return nil
 		default:
-			newCtx := wc.ctx
+			newCtx, cancel := context.WithTimeout(wc.ctx, wc.config.ReceiveMessageTimeout)
+			defer cancel()
 			rawMsg, err := wc.replicationConn.ReceiveMessage(newCtx)
 			if err != nil {
 				wc.ConsumerHealth.SetHealth(false)

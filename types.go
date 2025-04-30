@@ -32,6 +32,7 @@ type Config struct {
 	Publications          string
 	WalConsumerHealthPort int
 	ExtraPluginArgs       []string
+	ReceiveMessageTimeout time.Duration
 }
 
 type Log struct {
