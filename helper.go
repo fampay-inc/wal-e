@@ -89,7 +89,7 @@ func processOID(oid uint32, data []byte) (any, error) {
 	case 1700: // NUMERIC
 		return strconv.ParseFloat(strValue, 64)
 
-	case 3802: // JSONB
+	case 3802, 114: // JSONB, JSON
 		var jsonData any
 		if err := json.Unmarshal(data, &jsonData); err != nil {
 			return nil, err
