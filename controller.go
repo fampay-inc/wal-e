@@ -34,6 +34,8 @@ func (wc *WALController) InitConsumer() error {
 		return err
 	}
 
+	wc.logChan = make(chan *Log, wc.config.MaxLogChanSize)
+
 	// Start replication
 	plugins := []string{
 		"proto_version '1'",
@@ -116,13 +118,21 @@ func (wc *WALController) Consume(wg *sync.WaitGroup) error {
 				wc.ConsumerHealth.SetHealth(false)
 				return err
 			}
-			req := wc.NewLog(newCtx, rawMsg)
-			req.Start()
+			rawLog := wc.NewLog(newCtx, rawMsg)
+			log := wc.processWalLog(rawLog)
+			if log != nil {
+				wc.logChan <- log
+			}
 		}
 	}
 }
 
+func (wc *WALController) GetLogReceivceChannel() <-chan *Log {
+	return wc.logChan
+}
+
 func (wc *WALController) StopConsumer() {
+	close(wc.logChan)
 	wc.cancel()
 }
 
@@ -138,36 +148,21 @@ func (wc *WALController) SendPeriodicStandbyStatusUpdate() {
 	}
 }
 
-func (wc *WALController) ProcessWalLog(req *Log) {
-	switch msg := req.RawMsg.(type) {
+func (wc *WALController) processWalLog(log *Log) *Log {
+	switch msg := log.RawMsg.(type) {
 	case *pgproto3.CopyData:
 		walLog := wc.processCopyData(msg.Data)
 		if walLog != nil {
-			req.Wal = walLog
+			log.Wal = walLog
+		} else {
+			return nil
 		}
-		// if walLog != nil {
-		// 	err := wc.processWalLog(req.ctx, walLog)
-		// 	if err != nil {
-		// 		errdom.RaiseToSentry(req.ctx, err)
-		// 	}
-		// 	updatedAtOfWal, err := wc.ivUc.GetUpdatedAtOfWal(req.ctx, walLog)
-		// 	if err != nil {
-		// 		errdom.RaiseToSentry(req.ctx, err)
-		// 	}
-		// 	emitMetrics(currentTime, updatedAtOfWal, err)
-		// 	metrics.WalTableLogCounter.WithLabelValues(string(walLog.TableName), string(walLog.Operation)).Inc()
-		// } else {
-		// 	metrics.WalProcessedCounter.WithLabelValues("non_data", "success", "").Inc()
-		// 	metrics.WalProcessingLatency.WithLabelValues("non_data").Observe(time.Since(currentTime).Seconds())
-		// }
 		wc.ConsumerHealth.SetHealth(true)
-		req.Next()
+		return log
 	case *pgproto3.ErrorResponse:
 		fmt.Printf("This is error, %+v\n", msg)
-		// wc.logger.Errorf("Error response from server: %v", msg)
-
 	default:
 		fmt.Printf("Unknown message type, %+v\n", msg)
-		// wc.logger.Errorf("Unknown message type: %v", msg)
 	}
+	return log
 }

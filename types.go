@@ -23,6 +23,7 @@ type WALController struct {
 	handlers                  []Handler
 	ConsumerHealth            ConsumerHealth
 	relationCache             map[uint32]RelationData
+	logChan                   chan *Log
 
 	RecoverFromPanic func() func()
 }
@@ -33,6 +34,7 @@ type Config struct {
 	WalConsumerHealthPort int
 	ExtraPluginArgs       []string
 	ReceiveMessageTimeout time.Duration
+	MaxLogChanSize        int
 }
 
 type Log struct {
