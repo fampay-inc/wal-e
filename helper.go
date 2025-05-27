@@ -1,9 +1,7 @@
 package wal_e
 
 import (
-	"encoding/json"
 	"fmt"
-	"strconv"
 	"time"
 
 	"github.com/jackc/pglogrepl"
@@ -59,45 +57,13 @@ func processOID(oid uint32, data []byte) (any, error) {
 	if len(data) == 0 {
 		return nil, nil
 	}
-	strValue := string(data)
-	switch oid {
-	case 16:
-		return strValue == "t" || strValue == "true" || strValue == "True", nil
-	case 17:
-		return data, nil
-	case 20, 21, 23: // BIGINT, INT, SMALLINT
-		return strconv.ParseInt(strValue, 10, 64)
-	case 25, 1043: // TEXT, VARCHAR
-		return strValue, nil
 
-	case 700: // FLOAT4 (float32)
-		f, err := strconv.ParseFloat(strValue, 32)
-		return float32(f), err
-
-	case 701: // FLOAT8 (float64)
-		return strconv.ParseFloat(strValue, 64)
-
-	case 1082: // DATE
-		return time.Parse("2006-01-02", strValue)
-
-	case 1083, 1114: // TIME, TIMESTAMP (without timezone)
-		return time.Parse("2006-01-02 15:04:05", strValue)
-
-	case 1184: // TIMESTAMPTZ
-		return time.Parse("2006-01-02 15:04:05.999999-07", strValue)
-
-	case 1700: // NUMERIC
-		return strconv.ParseFloat(strValue, 64)
-
-	case 3802, 114: // JSONB, JSON
-		var jsonData any
-		if err := json.Unmarshal(data, &jsonData); err != nil {
-			return nil, err
-		}
-		return jsonData, nil
-	default: // Unknown type
-		return strValue, nil
+	convertFunc, ok := OidMap[oid]
+	if !ok {
+		return string(data), nil
 	}
+
+	return convertFunc(data)
 }
 
 func (wc *WALController) processRelationMessage(msg *pglogrepl.RelationMessage) {
