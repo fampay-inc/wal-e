@@ -41,6 +41,9 @@ var OidMap = map[uint32]func([]byte) (any, error){
 	// JSON, JSONB
 	3802: convertToJSON,
 	114:  convertToJSON,
+
+	// UUID
+	2950: convertToString,
 }
 
 func convertToBool(data []byte) (any, error) {
