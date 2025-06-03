@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"strconv"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 var OidMap = map[uint32]func([]byte) (any, error){
@@ -29,11 +31,11 @@ var OidMap = map[uint32]func([]byte) (any, error){
 	701: convertToFloat64,
 
 	// Date and time
-	1082: convertToDate,
-	1083: convertToTime,
-	1114: convertToTimestampWOTZ,
-	1184: convertToTimestampWTZ,
-	1266: convertToTimeWTZ,
+	1082: convertToString,
+	1083: convertToString,
+	1114: convertToString,
+	1184: convertToString,
+	1266: convertToString,
 
 	// NUMERIC
 	1700: convertToFloat64,
@@ -84,11 +86,17 @@ func convertToTimestampWOTZ(data []byte) (any, error) {
 }
 
 func convertToTimestampWTZ(data []byte) (any, error) {
-	return time.Parse("2006-01-02 15:04:05.000000 -0700 MST", string(data))
+	timeStr := string(data)
+	return time.Parse("2006-01-02 15:04:05.000000 -0700 MST", timeStr)
 }
 
 func convertToTimeWTZ(data []byte) (any, error) {
 	return time.Parse("15:04:05.999999Z07:00", string(data))
+}
+
+func convertToUUIDString(data []byte) (any, error) {
+	id, err := uuid.FromBytes(data)
+	return id.String(), err
 }
 
 func convertToJSON(data []byte) (any, error) {
