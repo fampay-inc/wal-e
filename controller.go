@@ -23,6 +23,10 @@ func (wc *WALController) NewLog(ctx context.Context, rawMsg pgproto3.BackendMess
 	}
 }
 
+func (wc *WALController) GetLastLSN() pglogrepl.LSN {
+	return wc.lastLSN
+}
+
 func (wc *WALController) InitConsumer() error {
 	var strLSN string
 	err := wc.masterDbConn.QueryRow(wc.ctx, "SELECT confirmed_flush_lsn FROM pg_replication_slots WHERE slot_name = $1;", wc.config.ReplicationSlot).Scan(&strLSN)
